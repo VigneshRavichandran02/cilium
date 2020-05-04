@@ -28,6 +28,7 @@ import (
 	enirouting "github.com/cilium/cilium/pkg/aws/eni/routing"
 	"github.com/cilium/cilium/pkg/datapath/connector"
 	"github.com/cilium/cilium/pkg/datapath/linux/route"
+	datapathOption "github.com/cilium/cilium/pkg/datapath/option"
 	"github.com/cilium/cilium/pkg/defaults"
 	"github.com/cilium/cilium/pkg/endpoint"
 	"github.com/cilium/cilium/pkg/endpoint/regeneration"
@@ -200,7 +201,7 @@ func CleanupEndpoint() {
 	// deletion of associated interfaces immediately (e.g. when a process in the
 	// namespace marked for deletion has not yet been terminated).
 	switch option.Config.DatapathMode {
-	case option.DatapathModeVeth:
+	case datapathOption.DatapathModeVeth:
 		for _, iface := range []string{legacyVethName, vethName} {
 			scopedLog := log.WithField(logfields.Veth, iface)
 			if link, err := netlink.LinkByName(iface); err == nil {
@@ -212,7 +213,7 @@ func CleanupEndpoint() {
 				scopedLog.WithError(err).Debug("Didn't find existing device")
 			}
 		}
-	case option.DatapathModeIpvlan:
+	case datapathOption.DatapathModeIpvlan:
 		if err := netns.RemoveIfFromNetNSWithNameIfBothExist(netNSName, epIfaceName); err != nil {
 			log.WithError(err).WithField(logfields.Ipvlan, epIfaceName).
 				Info("Couldn't delete cilium-health ipvlan slave device")
